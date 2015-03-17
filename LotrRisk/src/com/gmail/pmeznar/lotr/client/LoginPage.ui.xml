@@ -1,0 +1,27 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.title {
+			font-family: verdana;
+			font-size: large;
+			color: green;
+		}
+	</ui:style>
+	<g:HTMLPanel>
+		<g:VerticalPanel spacing="3">
+			<g:Label styleName="{style.title}">LOTR WARS X</g:Label>
+			<g:HorizontalPanel>
+				<g:Label>Username: </g:Label>
+				<g:TextBox ui:field="txtUsername"/>
+			</g:HorizontalPanel>
+			<g:HorizontalPanel>
+				<g:Label>Password: </g:Label>
+				<g:PasswordTextBox ui:field="txtPassword"></g:PasswordTextBox>			
+			</g:HorizontalPanel>
+			<g:HorizontalPanel width="100%">
+				<g:Button ui:field="btnLogin" width="100%">Login</g:Button>
+			</g:HorizontalPanel>
+		</g:VerticalPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

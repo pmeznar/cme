@@ -1,0 +1,33 @@
+.warbandColumn{
+    font-weight: bold;
+    padding-left: 10px;
+}
+.spanningRow{
+    width: 100%;
+}
+.addUnitButton{
+    width: 100%;
+}
+.bumpRight{
+    padding-left: 5px;
+}
+.floatRight{
+    float: right;
+}
+.chart{
+	background-color: #DDD;
+}
+.cheapAlign{
+	padding-top: 5px;
+}
+.chooseUnitLabel{
+	width: 70px;
+}
+.heroTxt{
+	width: 40px;
+}
+.territoryBox{
+	fill-opacity: .3;
+	stroke-opacity: .7;
+	stroke-width: 3px;
+}

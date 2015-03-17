@@ -1,0 +1,2 @@
+# Module com.gmail.pmeznar.lotr.lotr
+# RPC service class, partial path of RPC policy file
