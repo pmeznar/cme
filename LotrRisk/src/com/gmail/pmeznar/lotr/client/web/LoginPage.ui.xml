@@ -10,7 +10,7 @@
 	</ui:style>
 	<g:HTMLPanel>
 		<g:VerticalPanel spacing="3">
-			<g:Label styleName="{style.title}">LOTR WARS X</g:Label>
+			<g:Label styleName="{style.title}">Conflict in Middle Earth (test)</g:Label>
 			<g:HorizontalPanel>
 				<g:Label>Username: </g:Label>
 				<g:TextBox ui:field="txtUsername"/>

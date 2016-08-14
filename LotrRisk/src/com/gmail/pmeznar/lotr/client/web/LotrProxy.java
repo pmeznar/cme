@@ -1,10 +1,12 @@
-package com.gmail.pmeznar.lotr.client;
+package com.gmail.pmeznar.lotr.client.web;
 
+import com.gmail.pmeznar.lotr.client.ProxyReceiver;
 import com.gmail.pmeznar.lotr.client.model.Alliance;
 import com.gmail.pmeznar.lotr.client.model.Army;
 import com.gmail.pmeznar.lotr.client.model.Hero;
-import com.gmail.pmeznar.lotr.client.model.L_Unit;
+import com.gmail.pmeznar.lotr.client.model.Troop;
 import com.gmail.pmeznar.lotr.client.model.Warband;
+import com.gmail.pmeznar.lotr.client.widgets.StartGameClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -27,14 +29,14 @@ public class LotrProxy {
 		};
 	}
 	
-	public static void login(final String name, String pw){
-		new LotrRequest("Login.php?username="+name+"&password="+pw) {
+	public static void login(final String username, String password){
+		new LotrRequest("Login.php?username="+username+"&password="+password) {
 			
 			@Override
 			public void receive(LotrResponse response) {
 				if(response.status == LotrResponse.SUCCESS){
-					PlayerData.username = name;
-					LotrProxy.getGames();
+					PlayerData.create(username);
+					getGames();
 				} else {
 					Window.alert("User/password combination doesn't exist.\n" +
 						"Please try again.");
@@ -43,6 +45,17 @@ public class LotrProxy {
 		};
 	}
 	
+	public static void getGames(){
+		new LotrRequest("CurrentGames.php"){
+	
+			@Override
+			public void receive(LotrResponse response) {
+				new GameSelectPage().loadGames(response);				
+			}
+			
+		};
+	}
+
 	public static void getAllianceDetails(String gameName, final ProxyReceiver receiver){
 		new LotrRequest("GetAllianceDetails?game="+gameName) {
 			
@@ -50,17 +63,6 @@ public class LotrProxy {
 			public void receive(LotrResponse response) {
 				receiver.receive(response.messageArray);
 			}
-		};
-	}
-	
-	public static void getGames(){
-		new LotrRequest("CurrentGames.php"){
-
-			@Override
-			public void receive(LotrResponse response) {
-				new GameSelectPage().loadGames(response);				
-			}
-			
 		};
 	}
 	
@@ -88,57 +90,56 @@ public class LotrProxy {
 	
 	public static void downloadGameData(){
 		new LotrRequest("DownloadAlliance.php"){
-
 			@Override
 			public void receive(LotrResponse response) {
-				PlayerData.alliance = new Alliance(response.messageArray[0],
-						Integer.parseInt(response.messageArray[1]));
-				if(debug) Window.alert("Alliance: " + PlayerData.alliance.getName());
+				String allianceName = response.messageArray[0];
+				Integer allianceId = Integer.parseInt(response.messageArray[1]);
+				if(debug) Window.alert("Alliance: " + allianceName);
 				
-				LotrProxy.downloadArmies();
+				Alliance alliance = new Alliance(allianceName, allianceId);
+				LotrProxy.downloadArmies(alliance);
+				PlayerData.get().setAlliance(alliance);
 			}
-			
 		};
 	}
 	
-	public static void downloadArmies(){
-		int id = PlayerData.alliance.getDatabaseId();
-		new LotrRequest("DownloadArmy.php?allianceId=" + id){
-
+	public static void downloadArmies(final Alliance alliance){
+		new LotrRequest("DownloadArmy.php?allianceId=" + alliance.getDatabaseId()){
 			@Override
 			public void receive(LotrResponse response) {
 				String[] list = response.messageArray;
 				for(int i = 0; i < list.length; i += 2){
-					PlayerData.alliance.addArmy(new Army(list[i], Integer.parseInt(list[i + 1])));
-				}
-				
-				for(Army army: PlayerData.alliance.getArmies()){
-					if(debug) Window.alert("Army: " + army.getName());
-					LotrProxy.downloadWarbands(army);
+					String armyName = list[i];
+					Integer armyId = Integer.parseInt(list[i + 1]);
+
+					Army army = new Army(armyName, armyId);
+					LotrProxy.downloadWarbands(army, alliance.getDatabaseId());
+
+					alliance.addArmy(army);
 				}
 			}
 			
 		};
 	}
 	
-	public static void downloadWarbands(final Army army){
+	public static void downloadWarbands(final Army army, final int allianceId){
 		new LotrRequest("DownloadWarband.php?armyId=" + army.getDatabaseId()){
-
 			@Override
 			public void receive(LotrResponse response) {
 				String[] list = response.messageArray;
 				for(int i = 0; i < list.length; i += 3){
-					String[] details = {list[i], list[i+1], list[i+2]};
-					army.addWarband(Warband.load(details, army.getDatabaseId(), PlayerData.alliance.getDatabaseId()));
-				}
-				
-				for(Warband warband: army.getWarbands()){
+					String databaseId = list[i];
+					String hiddenIndicator = list[i + 1];
+					String warbandName = list[i + 2];
+
+					String[] details = {databaseId, hiddenIndicator, warbandName};
+					Warband warband = Warband.load(details, army.getDatabaseId(), allianceId);
+
 					if(debug) Window.alert("Warband: " + warband.getName());
 					LotrProxy.downloadWarbandContents(warband);
+					army.addWarband(warband);
 				}
-				
 			}
-			
 		};
 	}
 	
@@ -148,8 +149,14 @@ public class LotrProxy {
 			public void receive(LotrResponse response) {
 				String[] list = response.messageArray;
 				for(int i = 0; i < list.length; i += 5){
-					String[] details = {list[i], list[i+1], list[i+2], list[i+3], list[i+4]};
-					warband.addUnit(L_Unit.load(details));
+		            String id = list[i];
+ 		            String name = list[i + 1];
+            		String noise = list[i + 2];
+            		String cost = list[i + 3];
+            		String num = list[i + 4];
+					String[] details = {id, name, noise, cost, num};
+
+					warband.addTroop(Troop.load(details));
 					if(debug) Window.alert("Adding " + list[i+1] + " to " + warband.getName());
 				}
 			}
@@ -240,27 +247,24 @@ public class LotrProxy {
 
 							@Override
 							public void receive(LotrResponse response) {
-								for(final L_Unit unit: warband.getUnits()){
-									new LotrRequest("UploadUnit.php?unitName="+unit.getName()+"&unitCost="+unit.getCost()+"&noise="+unit.getNoise()){
+								for(final Troop troop: warband.getUnits()){
+									new LotrRequest("UploadUnit.php?unitName="+troop.getName()+"&unitCost="+troop.getCost()+"&noise="+troop.getNoise()){
 
 										@Override
 										public void receive(
 												LotrResponse response) {
 											String str = "UploadWarbandUnits.php?allianceName="+alliance.getName()+
 													"&armyName="+army.getName()+"&warbandName="+warband.getName()+
-													"&unitName="+unit.getName()+"&unitCost="+unit.getCost()+
-													"&unitNum="+unit.getNumber()+"&noise="+unit.getNoise();
+													"&unitName="+troop.getName()+"&unitCost="+troop.getCost()+
+													"&unitNum="+troop.getNumber()+"&noise="+troop.getNoise();
 
 											new LotrRequest(str){
 														@Override
 														public void receive(
 																LotrResponse response) {
-															
 														}
 											};
-											
 										}
-										
 									};
 								}
 
@@ -268,18 +272,16 @@ public class LotrProxy {
 									new LotrRequest("UploadHero.php?allianceName="+alliance.getName()+
 											"&armyName="+army.getName()+"&warbandName="+warband.getName()+
 											"&might="+hero.getMight()+"&will="+hero.getWill()+"&fate="+hero.getFate()+
-											"&wound="+hero.getWound()+"&leader="+hero.getLeader()+"&cost="+hero.getCost()+
+											"&wound="+hero.getWounds()+"&leader="+hero.getLeader()+"&cost="+hero.getCost()+
 											"&noise="+hero.getNoise()+"&name="+hero.getName()) {
 										
 										@Override
 										public void receive(LotrResponse response) {
-
 										}
 									};
 								}
 								// At this point, all requests are generated, although some may still be being processed...
 							}
-							
 						};
 					}
 				}

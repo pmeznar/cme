@@ -11,12 +11,14 @@ public class Alliance {
 	String name;
 	ArrayList<Army> armies = new ArrayList<Army>();
 	int curPoints;
+	int numTerritoriesOwned;
 	
 	public Alliance(String name, int points, int databaseId){
 		this.name = name;
 		this.points = points;
 		this.databaseId = databaseId;
 		curPoints = 0;
+		numTerritoriesOwned = 0;
 	}
 	
 	public Alliance(String name, int databaseId){

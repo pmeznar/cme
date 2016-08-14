@@ -1,6 +1,10 @@
-package com.gmail.pmeznar.lotr.client;
+package com.gmail.pmeznar.lotr.client.web;
 
 import com.gmail.pmeznar.lotr.client.model.Hero;
+import com.gmail.pmeznar.lotr.client.model.stats.Fate;
+import com.gmail.pmeznar.lotr.client.model.stats.Might;
+import com.gmail.pmeznar.lotr.client.model.stats.Will;
+import com.gmail.pmeznar.lotr.client.model.stats.Wounds;
 import com.gmail.pmeznar.lotr.client.widgets.CloseButton;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -109,41 +113,41 @@ public class Window_ChooseHero extends DialogBox{
 				closeButton.click();
 			}
 		}
-		
 	}
 	
+	// TODO This is doing more than verifying.  Fix it.
 	public boolean verify(){
-		String name, might, will, fate, wounds, cost, noise;
-		name = txtName.getText();
-		might = txtMight.getText();
-		will = txtWill.getText();
-		fate = txtFate.getText();
-		wounds = txtWounds.getText();
-		cost = txtCost.getText();
-		noise = txtNoise.getText();
+		String nameString, mightString, willString, fateString, woundsString, costString, noiseString;
+		nameString = txtName.getText();
+		mightString = txtMight.getText();
+		willString = txtWill.getText();
+		fateString = txtFate.getText();
+		woundsString = txtWounds.getText();
+		costString = txtCost.getText();
+		noiseString = txtNoise.getText();
 		
 		// Check Empty
-		if(	name.equals("")		||
-			might.equals("")	||
-			will.equals("")		||
-			fate.equals("")		||
-			wounds.equals("")	||
-			cost.equals("")		||
-			noise.equals("")){
+		if(	nameString.equals("")		||
+			mightString.equals("")	||
+			willString.equals("")		||
+			fateString.equals("")		||
+			woundsString.equals("")	||
+			costString.equals("")		||
+			noiseString.equals("")){
 				Window.alert("Please enter all fields");
 				return false;
 		}
 		
-		int m, wi, f, wo, c, n;
+		int might, will, fate, wounds, cost, noise;
 		
 		// Check Numbers
 		try{
-			m = Integer.parseInt(might);
-			wi = Integer.parseInt(will);
-			f = Integer.parseInt(fate);
-			wo = Integer.parseInt(wounds);
-			c  = Integer.parseInt(cost);
-			n = Integer.parseInt(noise);
+			might = Integer.parseInt(mightString);
+			will = Integer.parseInt(willString);
+			fate = Integer.parseInt(fateString);
+			wounds = Integer.parseInt(woundsString);
+			cost  = Integer.parseInt(costString);
+			noise = Integer.parseInt(noiseString);
 		} catch (NumberFormatException e){
 			Window.alert("Other than name, all fields must be numeric");
 			return false;
@@ -168,7 +172,7 @@ public class Window_ChooseHero extends DialogBox{
 			}
 		}
 		
-		if(window.allianceWindow.alliance.getCurrentPoints() + c > 
+		if(window.allianceWindow.alliance.getCurrentPoints() + cost > 
 			window.allianceWindow.alliance.getPointCapacity()){
 				int space = window.allianceWindow.alliance.getPointCapacity() -
 						window.allianceWindow.alliance.getCurrentPoints();
@@ -177,16 +181,16 @@ public class Window_ChooseHero extends DialogBox{
 				return false;
 		}
 		
-		// Add Hero to warband
-		Hero hero = new Hero(name, c, n, m, wi, f, wo);
+		// TODO looks like we're storing this information locally before writing it all to the database using this data model, then we pull it back down from the database but this time it has ids... meaning we really do have this like half baked object without ids...
+		final int temporaryFakeId = 0;
+		Hero hero = new Hero(nameString, cost, noise, new Might(might), new Will(will), new Fate(fate), new Wounds(wounds), chkLeader.getValue(), temporaryFakeId);
+
 		if(window.warband.addHero(hero)){
-			if(chkLeader.getValue()) hero.setLeader(true);
-			
 			// Add hero to chart
-			Label lblName = new Label(name);
-			Label lblCost = new Label(cost);
+			Label lblName = new Label(nameString);
+			Label lblCost = new Label(costString);
 			Label lblNum = new Label("1");
-			Label lblNoise = new Label(noise);
+			Label lblNoise = new Label(noiseString);
 			
 			lblName.setStyleName("floatRight");
 			lblCost.setStyleName("floatRight");
@@ -198,10 +202,10 @@ public class Window_ChooseHero extends DialogBox{
 			window.chart.unitNumber.add(lblNum);
 			window.chart.unitNoise.add(lblNoise);
 			
-			window.chart.totalCost += c;
-			window.chart.totalNoise += n;
+			window.chart.totalCost += cost;
+			window.chart.totalNoise += noise;
 			window.updateTotals();
-			window.allianceWindow.alliance.addPoints(c);
+			window.allianceWindow.alliance.addPoints(cost);
 			
 			if(chkKing.getValue()){
 				window.allianceWindow.alliance.setKing(hero);
@@ -211,5 +215,4 @@ public class Window_ChooseHero extends DialogBox{
 		}
 		return false;
 	}
-
 }

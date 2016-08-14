@@ -1,6 +1,6 @@
-package com.gmail.pmeznar.lotr.client;
+package com.gmail.pmeznar.lotr.client.web;
 
-import com.gmail.pmeznar.lotr.client.model.L_Unit;
+import com.gmail.pmeznar.lotr.client.model.Troop;
 import com.gmail.pmeznar.lotr.client.widgets.CloseButton;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sun.java.swing.plaf.windows.resources.windows;
 
-public class Window_ChooseUnit extends DialogBox{
+public class Window_ChooseTroop extends DialogBox{
 	private Window_ConstructWarband parentWindow;
 	private VerticalPanel pnlBase = new VerticalPanel();
 	private TextBox txtName, txtCost, txtNoise, txtNumber;
@@ -25,7 +25,7 @@ public class Window_ChooseUnit extends DialogBox{
 	private ListBox lstTypes;
 	private CloseButton closeButton = new CloseButton(this);
 	
-	public Window_ChooseUnit(Window_ConstructWarband window){
+	public Window_ChooseTroop(Window_ConstructWarband window){
 		this.parentWindow = window;
 		this.add(pnlBase);
 		
@@ -52,7 +52,7 @@ public class Window_ChooseUnit extends DialogBox{
 	}
 	
 	private void setupWindow(){
-		pnlBase.add(new Label("Add Unit"));
+		pnlBase.add(new Label("Add Troop"));
 		
 		HorizontalPanel pnlLoad = new HorizontalPanel();
 		pnlLoad.getElement().getStyle().setPaddingBottom(3.0, Unit.PX);
@@ -70,7 +70,7 @@ public class Window_ChooseUnit extends DialogBox{
 		
 		vpnlLabels.add(new Label("Load:"));
 		vpnlLabels.add(new Label("Create:"));
-		vpnlLabels.setStyleName("chooseUnitLabel");
+		vpnlLabels.setStyleName("chooseTroopLabel");
 		
 		vpnlType.add(lstTypes);
 		vpnlType.add(txtName);
@@ -83,7 +83,7 @@ public class Window_ChooseUnit extends DialogBox{
 		
 		HorizontalPanel pnlTotals = new HorizontalPanel();
 		Label lblMany = new Label("How Many:");
-		lblMany.setStyleName("chooseUnitLabel");
+		lblMany.setStyleName("chooseTroopLabel");
 		pnlTotals.add(lblMany);
 		pnlTotals.add(txtNumber);
 		pnlTotals.add(new Label("Total Cost:"));
@@ -167,7 +167,7 @@ public class Window_ChooseUnit extends DialogBox{
 		return true;
 	}
 	
-	public boolean addUnits(){
+	public boolean addTroops(){
 		String name = txtName.getText();
 		int cost = Integer.parseInt(txtCost.getText());
 		int number = Integer.parseInt(txtNumber.getText());
@@ -182,8 +182,9 @@ public class Window_ChooseUnit extends DialogBox{
 		Label lblNoise = new Label(noise + "");
 		lblNoise.setStyleName("floatRight");
 		
-		L_Unit unit = new L_Unit(name, cost, noise, 0, number);
-		if(parentWindow.warband.addUnit(unit)){
+		final int temporaryFakeId = 0;
+		Troop unit = new Troop(name, cost, noise, /* TODO moveRate */ 0, true, temporaryFakeId, number);
+		if(parentWindow.warband.addTroop(unit)){
 			parentWindow.chart.unitType.add(lblName);
 			parentWindow.chart.unitCost.add(lblCost);
 			parentWindow.chart.unitNumber.add(lblNumber);
@@ -202,16 +203,14 @@ public class Window_ChooseUnit extends DialogBox{
 	}
 	
 	private class SetClickHandler implements ClickHandler{
-
 		@Override
 		public void onClick(ClickEvent event) {
 			if(verify()){
-				if(addUnits()){
+				if(addTroops()){
 					closeButton.click();
 				}
 			}
 		}
 		
 	}
-
 }

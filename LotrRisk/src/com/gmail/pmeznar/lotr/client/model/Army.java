@@ -6,13 +6,14 @@ import com.google.gwt.user.client.Window;
 
 
 public class Army {
-	int databaseId;
-	String name;
-	ArrayList<Warband> warbands = new ArrayList<Warband>();
+	final int databaseId;
+	final String name;
+	final ArrayList<Warband> warbands;
 	
 	public Army(String name, int databaseId){
 		this.name = name;
 		this.databaseId = databaseId;
+		this.warbands = new ArrayList<Warband>();
 	}
 	
 	public String getName(){

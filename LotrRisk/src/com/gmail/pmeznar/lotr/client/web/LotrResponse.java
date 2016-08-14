@@ -1,4 +1,4 @@
-package com.gmail.pmeznar.lotr.client;
+package com.gmail.pmeznar.lotr.client.web;
 
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
@@ -13,7 +13,7 @@ public class LotrResponse {
 	public final static int SUCCESS = 1;
 	public final static int WARNING = 2;
 	
-	int status;
+	public int status;
 	String message;
 	String[] messageArray;
 	

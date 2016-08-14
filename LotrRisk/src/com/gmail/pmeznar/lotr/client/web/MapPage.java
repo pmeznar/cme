@@ -1,7 +1,8 @@
-package com.gmail.pmeznar.lotr.client;
+package com.gmail.pmeznar.lotr.client.web;
 
 import org.vaadin.gwtgraphics.client.DrawingArea;
 
+import com.gmail.pmeznar.lotr.client.TerritoryBox;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.ImageData;
@@ -30,7 +31,7 @@ public class MapPage {
 			
 			@Override
 			public void run() {
-				PlayerData.alliance.showInfo();
+				PlayerData.get().getAlliance().showInfo();
 			}
 		};
 		

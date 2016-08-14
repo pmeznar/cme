@@ -1,7 +1,8 @@
-package com.gmail.pmeznar.lotr.client;
+package com.gmail.pmeznar.lotr.client.web;
 
 import java.util.ArrayList;
 
+import com.gmail.pmeznar.lotr.client.ProxyReceiver;
 import com.gmail.pmeznar.lotr.client.widgets.CloseButton;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;

@@ -1,8 +1,8 @@
-package com.gmail.pmeznar.lotr.client;
+package com.gmail.pmeznar.lotr.client.web;
 
 import com.gmail.pmeznar.lotr.client.model.Army;
 import com.gmail.pmeznar.lotr.client.model.Hero;
-import com.gmail.pmeznar.lotr.client.model.L_Unit;
+import com.gmail.pmeznar.lotr.client.model.Troop;
 import com.gmail.pmeznar.lotr.client.model.Warband;
 import com.gmail.pmeznar.lotr.client.widgets.CloseButton;
 import com.google.gwt.dom.client.Style.Unit;
@@ -28,7 +28,6 @@ public class Window_ConstructWarband extends DialogBox {
 	public Window_ConstructWarband(Window_ConstructAlliance allianceWindow, TextBox txtArmyName){
 		this.allianceWindow = allianceWindow;
 		this.txtArmyName = txtArmyName;
-		warband = new Warband("tmpName");
 		this.add(basePanel);
 		
 		setupWindow();
@@ -197,7 +196,7 @@ public class Window_ConstructWarband extends DialogBox {
 		}
 		@Override
 		public void onClick(ClickEvent event) {
-			new Window_ChooseUnit(warbandWindow);
+			new Window_ChooseTroop(warbandWindow);
 		}
 		
 	}
@@ -230,7 +229,7 @@ public class Window_ConstructWarband extends DialogBox {
 				num += hero.getCost();
 			}
 			
-			for(L_Unit unit: warband.getUnits()){
+			for(Troop unit: warband.getUnits()){
 				num += unit.getTotalCost();
 			}
 			

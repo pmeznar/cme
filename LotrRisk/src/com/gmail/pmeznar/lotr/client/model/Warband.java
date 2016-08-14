@@ -2,38 +2,46 @@ package com.gmail.pmeznar.lotr.client.model;
 
 import java.util.ArrayList;
 
-import com.gmail.pmeznar.lotr.client.LotrProxy;
 import com.gmail.pmeznar.lotr.client.ProxyReceiver;
+import com.gmail.pmeznar.lotr.client.web.LotrProxy;
 import com.google.gwt.user.client.Window;
 
 public class Warband implements ProxyReceiver{
-	String name, armyName, allianceName;
-	int databaseId, armyId, allianceId;
+	String name;
+	final int databaseId, armyId, allianceId;
+	
+	final ArrayList<Troop> units;
+	final ArrayList<Hero> heroes;
+
 	boolean hidden;
-	
-	ArrayList<L_Unit> units;
-	ArrayList<Hero> heroes;
-	
+	boolean toTheKing;
+	Territory territory;
+	int moveRate;
 	
 	public static Warband load(String[] details, int armyId, int allianceId){
-		Warband warband = new Warband(details[2]);
-		warband.databaseId = Integer.parseInt(details[0]);
+		int databaseId = Integer.parseInt(details[0]);
 		int hidden = Integer.parseInt(details[1]);
-		if(hidden == 1) warband.hidden = true;
-		else 			warband.hidden = false;
-		warband.armyId = armyId;
-		warband.allianceId = allianceId;
 		
+		boolean isHidden = hidden > 0;
+		boolean isToTheKing = false; // TODO read 'to the king' from DB
+
+		Warband warband = new Warband(details[2], databaseId, armyId, allianceId, isHidden, isToTheKing);
+
 		return warband;
 	}
 	
-	public Warband(String name){
+	public Warband(String name, int databaseId, int armyId, int allianceId, boolean hidden, boolean toTheKing){
 		this.name = name;
-		
-		hidden = false;
-		units = new ArrayList<L_Unit>();
+
+		this.hidden = hidden;
+		this.toTheKing = toTheKing;
+
+		this.databaseId = databaseId;
+		this.armyId = armyId;
+		this.allianceId = allianceId;
+
+		units = new ArrayList<Troop>();
 		heroes = new ArrayList<Hero>();
-		databaseId = 0;
 	}
 	
 	public void loadUnits(){
@@ -45,7 +53,7 @@ public class Warband implements ProxyReceiver{
 				
 	}
 	
-	public boolean addUnit(L_Unit unit){
+	public boolean addTroop(Troop unit){
 		if(getNumberUnits() + unit.number > 13){
 			int space = 13 - getNumberUnits();
 			Window.alert("Tried to add " + unit.number + " units.\n" +
@@ -84,14 +92,14 @@ public class Warband implements ProxyReceiver{
 		for(Hero hero: heroes){
 			hero.showInfo();
 		}
-		for(L_Unit unit: units){
+		for(Troop unit: units){
 			unit.showInfo();
 		}
 	}
 	
 	private int getNumberUnits(){
 		int num = 0;
-		for(L_Unit unit: units){
+		for(Troop unit: units){
 			num += unit.number;
 		}
 	
@@ -104,7 +112,7 @@ public class Warband implements ProxyReceiver{
 		return name;
 	}
 	
-	public ArrayList<L_Unit> getUnits(){
+	public ArrayList<Troop> getUnits(){
 		return units;
 	}
 	

@@ -1,7 +1,8 @@
-package com.gmail.pmeznar.lotr.client;
+package com.gmail.pmeznar.lotr.client.web;
 
 import java.util.ArrayList;
 
+import com.gmail.pmeznar.lotr.client.ProxyReceiver;
 import com.gmail.pmeznar.lotr.client.model.Alliance;
 import com.gmail.pmeznar.lotr.client.model.Army;
 import com.gmail.pmeznar.lotr.client.model.Hero;
@@ -90,7 +91,7 @@ public class Window_ConstructAlliance extends DialogBox implements ProxyReceiver
 			
 			//alliance.showInfo();
 			
-			PlayerData.alliance = alliance;
+			PlayerData.get().setAlliance(alliance);
 			LotrProxy.uploadAlliance(alliance);
 			closeButton.click();
 		}

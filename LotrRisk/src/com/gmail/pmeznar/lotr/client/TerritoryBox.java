@@ -3,6 +3,8 @@ package com.gmail.pmeznar.lotr.client;
 import org.vaadin.gwtgraphics.client.shape.Rectangle;
 
 import com.gmail.pmeznar.lotr.client.model.Army;
+import com.gmail.pmeznar.lotr.client.web.LotrProxy;
+import com.gmail.pmeznar.lotr.client.web.PlayerData;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -39,7 +41,7 @@ public class TerritoryBox extends Rectangle implements ProxyReceiver {
 		}
 		@Override
 		public void onClick(ClickEvent event) {
-			LotrProxy.isMyTurn(PlayerData.alliance.getDatabaseId(), box);
+			LotrProxy.isMyTurn(PlayerData.get().getAlliance().getDatabaseId(), box);
 		}
 	}
 
@@ -48,7 +50,7 @@ public class TerritoryBox extends Rectangle implements ProxyReceiver {
 		String myTurn = (String) objects[0];
 		if(myTurn.equals("yes")){
 			String armies = "";
-			for(Army army: PlayerData.alliance.getArmies()){
+			for(Army army: PlayerData.get().getAlliance().getArmies()){
 				armies = armies + army.getName() + "\n";
 			}
 			Window.alert(armies);

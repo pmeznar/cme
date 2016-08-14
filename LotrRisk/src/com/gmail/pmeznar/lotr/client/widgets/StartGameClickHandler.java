@@ -1,5 +1,6 @@
-package com.gmail.pmeznar.lotr.client;
+package com.gmail.pmeznar.lotr.client.widgets;
 
+import com.gmail.pmeznar.lotr.client.web.LotrProxy;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 

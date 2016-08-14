@@ -1,4 +1,4 @@
-package com.gmail.pmeznar.lotr.client;
+package com.gmail.pmeznar.lotr.client.web;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
-
 import com.google.gwt.user.client.ui.Widget;
 
 public class LoginPage extends Composite {
@@ -27,7 +26,6 @@ public class LoginPage extends Composite {
 		initWidget(uiBinder.createAndBindUi(this));
 		
 		btnLogin.addClickHandler(new loginClickHandler(txtUsername, txtPassword));
-		
 	}
 	
 	private class loginClickHandler implements ClickHandler{
@@ -42,7 +40,5 @@ public class LoginPage extends Composite {
 		public void onClick(ClickEvent event) {
 			LotrProxy.login(name.getText(), password.getText());
 		}
-		
 	}
-
 }
