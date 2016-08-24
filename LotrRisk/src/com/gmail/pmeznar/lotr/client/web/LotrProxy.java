@@ -6,22 +6,32 @@ import com.gmail.pmeznar.lotr.client.model.Army;
 import com.gmail.pmeznar.lotr.client.model.Hero;
 import com.gmail.pmeznar.lotr.client.model.Troop;
 import com.gmail.pmeznar.lotr.client.model.Warband;
-import com.gmail.pmeznar.lotr.client.widgets.StartGameClickHandler;
+import com.gmail.pmeznar.lotr.client.widgets.StartGameClick;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * Class that interacts with the server.
+ * @author pmeznar
+ */
 public class LotrProxy {
 	public static String BASE = "lotrphp/";
     static boolean debug = false;
+    private static String STARTED = "started";
+    private static String ARMIES_LOADED = "armies_loaded";
+    // TODO Extract loading and storing into a separate proxy class this are so cluttered.
 	
+    /**
+     * Checks to see if a user is currently logged in.  If so, goes to game page.  Otherwise, goes to login page.
+     */
 	public static void isLoggedIn(){
 		new LotrRequest("IsLoggedIn.php"){
 			@Override
 			public void receive(LotrResponse response) {
 				if(response.status == LotrResponse.SUCCESS){
-					LotrProxy.getGames();
+					LotrProxy.loadGameSelectPage();
 				} else {
 					RootPanel.get().add(new LoginPage());
 				}
@@ -29,14 +39,18 @@ public class LotrProxy {
 		};
 	}
 	
+	/**
+	 * Logs a user in.  Username and password are passed as plain text, this is just a silly game for fun after all.
+	 * If the user logs in correctly, we load the game select page.
+	 * Otherwise they need to try again.
+	 */
 	public static void login(final String username, String password){
 		new LotrRequest("Login.php?username="+username+"&password="+password) {
-			
 			@Override
 			public void receive(LotrResponse response) {
 				if(response.status == LotrResponse.SUCCESS){
 					PlayerData.create(username);
-					getGames();
+					loadGameSelectPage();
 				} else {
 					Window.alert("User/password combination doesn't exist.\n" +
 						"Please try again.");
@@ -45,19 +59,20 @@ public class LotrProxy {
 		};
 	}
 	
-	public static void getGames(){
+	/**
+	 * Displays the game select page.
+	 */
+	public static void loadGameSelectPage(){
 		new LotrRequest("CurrentGames.php"){
-	
 			@Override
 			public void receive(LotrResponse response) {
-				new GameSelectPage().loadGames(response);				
+				new GameSelectPage().loadAndDisplayGames(response);				
 			}
-			
 		};
 	}
 
 	public static void getAllianceDetails(String gameName, final ProxyReceiver receiver){
-		new LotrRequest("GetAllianceDetails?game="+gameName) {
+		new LotrRequest("GetAllianceDetails.php?game="+gameName) {
 			
 			@Override
 			public void receive(LotrResponse response) {
@@ -66,14 +81,16 @@ public class LotrProxy {
 		};
 	}
 	
+	/**
+	 * Returns all users to the given receiver.
+	 * @param receiver
+	 */
 	public static void getUsers(final ProxyReceiver receiver){
 		new LotrRequest("GetPlayers.php"){
-
 			@Override
 			public void receive(LotrResponse response) {
 				receiver.receive(response.messageArray);
 			}
-			
 		};
 	}
 	
@@ -177,28 +194,37 @@ public class LotrProxy {
 			};
 	}
 	
+	/**
+	 * Starts a game. Game could be in effectively two states:
+	 * 1 - In progress, or "started". Means alliances have been composed and positions are set.
+	 * 2 - Hasn't officialy started, but armies have been chosen.  Goes to map page, but positions must be chosen.
+	 * 3 - Armies have not been set.  Must set armies.
+	 * 
+	 * Current plan is to implement it so that this keeps recursing until we hit the "STARTED" phase.  3 -> 2 -> 1.
+	 */
 	public static void startGame(final String gameName){
 		new LotrRequest("GetGameStarted.php?game="+gameName){
-
 			@Override
 			public void receive(LotrResponse response) {
 				if(response.status == LotrResponse.SUCCESS){
-					if(response.message.equals("started")){
-						//go to map page, I guess
-					} else if(response.message.equals("armies_loaded")){
-						LotrProxy.downloadGameData();
-						new MapPage().load();
+					String status = response.message;
+					Window.alert(status);
+					if(status.equals(STARTED)){
+
+					} else if (status.equals(ARMIES_LOADED)) {
+						// TODO when is the database getting updated for this to get hit??
+					    LotrProxy.downloadGameData();
+					    new MapPage().loadAndChooseLocations();
 					} else {
-						new Window_ConstructAlliance(gameName);
 					}
 				}
-				
 			}
-			
 		};
-		
 	}
 	
+	/**
+	 * Looks like this just sets up high-level game data, and doesn't actually have the contents of the alliances at this point.
+	 */
 	public static void uploadGameData(final String gameName, String alliNames, String
 			alliPoints, String players, String playerAlliances, final VerticalPanel pnlGamesList){
 		String str = "UploadGameData.php?g="+gameName+"&an="+alliNames+
@@ -212,10 +238,10 @@ public class LotrProxy {
 				if(!(response.status == LotrResponse.SUCCESS)){
 					Window.alert("Error saving game data");
 				} else {
-					Button newGame = new Button(gameName);
-					newGame.setWidth("100%");
-					newGame.addClickHandler(new StartGameClickHandler(gameName));
-					pnlGamesList.add(newGame);
+					Button gameButton = new Button(gameName);
+					gameButton.setWidth("100%");
+					gameButton.addClickHandler(new StartGameClick(gameName));
+					pnlGamesList.add(gameButton);
 				}
 			}
 			
@@ -236,6 +262,10 @@ public class LotrProxy {
 		};
 	}
 	
+	/**
+	 * Uploads all alliance data into the database..
+	 * @param alliance The alliance to be uploaded.
+	 */
 	public static void uploadAlliance(final Alliance alliance){
 		for(final Army army: alliance.getArmies()){
 			new LotrRequest("UploadArmy.php?allianceName="+alliance.getName()+"&armyName="+army.getName()) {
@@ -288,7 +318,4 @@ public class LotrProxy {
 			};
 		}
 	}
-	
-	
-
 }

@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import com.gmail.pmeznar.lotr.client.ProxyReceiver;
 import com.gmail.pmeznar.lotr.client.widgets.CloseButton;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -33,7 +35,7 @@ public class Window_GameSetup extends DialogBox implements ProxyReceiver{
 		this.setTitle("Game Setup");
 		this.pnlGamesList = pnlGamesList;
 		
-		LotrProxy.getUsers(this);
+		LotrProxy.getUsers(this); // populates players
 		fillContents();
 	}
 	
@@ -127,13 +129,18 @@ public class Window_GameSetup extends DialogBox implements ProxyReceiver{
 		return concat;
 	}
 	
+	/**
+	 * Handles
+	 * @author pmeznar
+	 *
+	 */
 	private class NumPlayerChangeHandler implements ChangeHandler{
 		VerticalPanel base;
-		ListBox lstNP;
+		ListBox lstNumberOfPlayers;
 		
 		public NumPlayerChangeHandler(VerticalPanel base, ListBox lstNP){
 			this.base = base;
-			this.lstNP = lstNP;
+			this.lstNumberOfPlayers = lstNP;
 		}
 		
 		@Override
@@ -144,15 +151,17 @@ public class Window_GameSetup extends DialogBox implements ProxyReceiver{
 			selectedAlliances.clear();
 			base.clear();
 			
-			int num = Integer.parseInt(lstNP.getItemText(lstNP.getSelectedIndex()));
-			int numAlliance = 0;
-			if(num % 2 == 0) {
-				numAlliance = 2;
+			int playerCount = Integer.parseInt(lstNumberOfPlayers.getItemText(lstNumberOfPlayers.getSelectedIndex()));
+			int allianceCount = 0;
+			// 4 players still just get 2 alliances
+			if(playerCount % 2 == 0) {
+				allianceCount = 2;
 			} else {
-				numAlliance = 3;
+				allianceCount = 3;
 			}
 			
-			for(int i = 0; i < num; i++){
+			// Creates multiple lists of all potential players
+			for(int i = 0; i < playerCount; i++){
 				HorizontalPanel pnlPlayer = new HorizontalPanel();
 				
 				lstPlayers = new ListBox();
@@ -161,7 +170,7 @@ public class Window_GameSetup extends DialogBox implements ProxyReceiver{
 				}
 				
 				lstAlliance = new ListBox();
-				for(int j = 1; j <= numAlliance; j++){
+				for(int j = 1; j <= allianceCount; j++){
 					lstAlliance.addItem(j + "");
 				}
 				
@@ -172,7 +181,7 @@ public class Window_GameSetup extends DialogBox implements ProxyReceiver{
 				base.add(pnlPlayer);
 			}
 			
-			for(int i = 1; i <= numAlliance; i++){
+			for(int i = 1; i <= allianceCount; i++){
 				HorizontalPanel pnlAlliance = new HorizontalPanel();
 				Label numLabel = new Label("Alliance " + i + " name: ");
 				pnlAlliance.add(numLabel);
@@ -262,6 +271,9 @@ public class Window_GameSetup extends DialogBox implements ProxyReceiver{
 		return true;
 	}
 	
+	/**
+	 * Stores all into the players array.
+	 */
 	@Override
 	public void receive(Object[] objects) {
 		players = new String[objects.length];

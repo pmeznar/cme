@@ -22,12 +22,18 @@ public class LoginPage extends Composite {
 	interface LoginPageUiBinder extends UiBinder<Widget, LoginPage> {
 	}
 
+	/**
+	 * Constructs a login page and displays it to the user.
+	 */
 	public LoginPage() {
 		initWidget(uiBinder.createAndBindUi(this));
 		
 		btnLogin.addClickHandler(new loginClickHandler(txtUsername, txtPassword));
 	}
 	
+	/**
+	 * Invokes the login process.
+	 */
 	private class loginClickHandler implements ClickHandler{
 		TextBox name;
 		PasswordTextBox password;

@@ -3,6 +3,7 @@ package com.gmail.pmeznar.lotr.client.web;
 import org.vaadin.gwtgraphics.client.DrawingArea;
 
 import com.gmail.pmeznar.lotr.client.TerritoryBox;
+import com.gmail.pmeznar.lotr.client.model.Alliance;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.ImageData;
@@ -21,23 +22,39 @@ public class MapPage {
 	public static final int NUM_TERRITORIES = 63;
 	private TerritoryBox[] tboxes = new TerritoryBox[NUM_TERRITORIES];
 	
-	public void load(){
+	/**
+	 * Loads the map page and starts the process of assigning warbands to territories.
+	 */
+	public void loadAndChooseLocations(){
 		RootPanel.get().clear();
 		loadImage();
 		loadLocations();
 		setUpCanvas();
 		
 		Timer timer = new Timer() {
-			
 			@Override
 			public void run() {
-				PlayerData.get().getAlliance().showInfo();
+				Alliance playerAlliance = PlayerData.get().getAlliance();
+				playerAlliance.showInfo();
 			}
 		};
-		
 		if (LotrProxy.debug) timer.schedule(1000);
+		
+		chooseWarbandLocations(PlayerData.get().getAlliance());
 	}
 	
+	// Kinda don't think this should live here...
+	private void chooseWarbandLocations(Alliance playerAlliance) {
+		// TODO implement...
+		// Gotta look at how the map is divied up
+		// Probably something like "choose region"
+		// Then cycle through each warband and allow them to choose what a territory in that region
+		// Will have to look at the rules for stuff like "can start hidden?" "max in territory?" etc
+		
+		// Then, upload all that data, clear our the page, and call the "startgame" one last time
+		Window.alert("choose warband locations");
+	}
+
 	private void setUpCanvas(){
 		DrawingArea canvas = new DrawingArea(1250, 1850);
 		canvas.getElement().getStyle().setPosition(Position.ABSOLUTE);
@@ -52,7 +69,6 @@ public class MapPage {
 		RootPanel.get().add(canvas);
 	}
   
-	// This is important to use a handler!
 	private void loadImage() {
 	    final Image img = new Image("/images/map.jpg");
 	    RootPanel.get().add(img);
